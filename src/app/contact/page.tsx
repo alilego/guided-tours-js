@@ -20,7 +20,7 @@ export default function ContactPage() {
             Get in Touch
           </h1>
           <p className="mt-2 text-base text-indigo-100 max-w-3xl">
-            Have questions about our tours? We're here to help! Contact us today and let's start planning your next adventure.
+            Have questions about our tours? We&apos;re here to help! Contact us today and let&apos;s start planning your next adventure.
           </p>
         </div>
       </div>
