@@ -12,7 +12,7 @@ export default function Home() {
                 Discover Romania with Expert Guides
               </h1>
               <p className="mt-6 text-lg leading-8 text-gray-600">
-                Experience authentic local culture, unforgettable history and adventures with our carefully curated tours and expert local guides.
+                Experience authentic local culture, unforgettable history and adventures with our carefully curated tours and expert local guides. Start your journey today!
               </p>
               <div className="mt-10 flex items-center gap-x-6">
                 <a
