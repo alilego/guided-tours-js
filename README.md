@@ -65,7 +65,7 @@ Note: If you're on an IPv4 network, use the Session Pooler connection string fro
 
 This project uses GitHub Actions for continuous integration and deployment:
 
-1. Every push to the `main` branch will:
+1. Every push to the `master` branch will:
    - Build the project
    - Run tests
    - Deploy to Vercel automatically
