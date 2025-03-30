@@ -20,6 +20,66 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Environment Variables
+
+This project uses environment variables for configuration. To set up your environment:
+
+1. Copy the `.env.example` file to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+2. Update the `.env` file with your actual values
+3. Never commit the `.env` file to version control
+
+### For Developers Cloning This Repository
+
+If you're cloning this repository to use it yourself:
+
+1. Create your own Supabase project at [https://supabase.com](https://supabase.com)
+2. Get your own database credentials from your Supabase project
+3. Create a `.env` file with your own credentials
+4. If you want to use GitHub Actions:
+   - Go to your repository's Settings → Secrets and variables → Actions
+   - Add your own secrets with the same names as in the workflow file
+   - Your secrets will be secure and only accessible to you
+
+## Database Setup
+
+This project uses Prisma with Supabase PostgreSQL database. To set up the database:
+
+1. Create a Supabase project at [https://supabase.com](https://supabase.com)
+2. Get your database connection string from Project Settings > Database
+3. Update your `.env` file with the database connection string:
+   ```
+   DATABASE_URL="postgresql://postgres.[YOUR-PROJECT-REF]:[YOUR-PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:5432/postgres?schema=public"
+   ```
+4. Run the following commands to set up the database:
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+Note: If you're on an IPv4 network, use the Session Pooler connection string from Supabase instead of the direct database connection.
+
+## Deployment
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+1. Every push to the `main` branch will:
+   - Build the project
+   - Run tests
+   - Deploy to Vercel automatically
+
+2. To enable automatic deployment:
+   - Create a Vercel project
+   - Get your Vercel credentials (token, org ID, project ID)
+   - Add them as secrets in your GitHub repository:
+     ```
+     VERCEL_TOKEN
+     VERCEL_ORG_ID
+     VERCEL_PROJECT_ID
+     ```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

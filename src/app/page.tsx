@@ -55,7 +55,7 @@ export default function Home() {
               <article key={tour} className="flex flex-col items-start">
                 <div className="relative w-full">
                   <Image
-                    src={`https://source.unsplash.com/random/800x600?travel&sig=${tour}`}
+                    src={`https://images.unsplash.com/photo-${tour === 1 ? '1507525428034-b723cf961d3e' : tour === 2 ? '1469474968028-56623f02e42e' : '1472214103451-9374bd1c798e'}?auto=format&fit=crop&w=800&h=600&q=80`}
                     alt={`Tour ${tour} preview`}
                     width={800}
                     height={600}
