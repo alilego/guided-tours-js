@@ -1,20 +1,12 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import { createClient } from '@supabase/supabase-js';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import { PrismaClient } from '@prisma/client';
 
-// Create a Supabase client with the service role key
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-);
+const prisma = new PrismaClient();
 
 const handler = NextAuth({
+  adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -22,54 +14,31 @@ const handler = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
-      if (account?.provider === 'google') {
-        try {
-          // Check if user exists
-          const { data: existingUser } = await supabase
-            .from('users')
-            .select('*')
-            .eq('email', user.email)
-            .single();
-
-          if (!existingUser) {
-            // Create new user with role
-            const role = user.email === 'vladhan2@gmail.com' ? 'ADMIN' : 'USER';
-            
-            await supabase.from('users').insert([
-              {
-                email: user.email,
-                name: user.name,
-                role: role,
-              },
-            ]);
-          }
-        } catch (error) {
-          console.error('Error in signIn callback:', error);
-        }
+    async signIn({ account, profile }) {
+      if (account?.provider === 'google' && profile?.email) {
+        // Check if the email matches the admin email
+        const isAdmin = profile.email === process.env.ADMIN_EMAIL;
+        
+        // Create or update user with role
+        await prisma.user.upsert({
+          where: { email: profile.email },
+          create: {
+            email: profile.email,
+            name: profile.name || '',
+            role: isAdmin ? 'ADMIN' : 'USER',
+          },
+          update: {
+            role: isAdmin ? 'ADMIN' : 'USER',
+          },
+        });
       }
       return true;
     },
     async session({ session, user }) {
-      try {
-        // Get user role from Supabase
-        const { data: userData } = await supabase
-          .from('users')
-          .select('role')
-          .eq('email', session.user?.email)
-          .single();
-
-        return {
-          ...session,
-          user: {
-            ...session.user,
-            role: userData?.role || 'USER',
-          },
-        };
-      } catch (error) {
-        console.error('Error in session callback:', error);
-        return session;
+      if (session?.user) {
+        session.user.role = user.role;
       }
+      return session;
     },
   },
   pages: {

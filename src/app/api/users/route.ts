@@ -10,67 +10,88 @@ export async function GET() {
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error('Missing Supabase credentials:', {
         hasUrl: !!supabaseUrl,
-        hasKey: !!supabaseServiceKey
-      });
-      return NextResponse.json(
-        { error: 'Missing Supabase credentials' },
-        { status: 500 }
-      );
-    }
-
-    // Create Supabase client with service role key
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // First, test the connection
-    const { data: versionData, error: versionError } = await supabase.rpc('version');
-    if (versionError) {
-      console.error('Error testing connection:', versionError);
-      return NextResponse.json(
-        { error: 'Failed to connect to Supabase', details: versionError },
-        { status: 500 }
-      );
-    }
-
-    // Fetch users
-    const { data: users, error } = await supabase
-      .from('users')
-      .select('id, email, name, role, "createdAt"')
-      .order('createdAt', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching users:', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint
+        hasServiceKey: !!supabaseServiceKey
       });
       return NextResponse.json(
         { 
-          error: 'Failed to fetch users',
+          error: 'Missing Supabase credentials',
           details: {
-            message: error.message,
-            code: error.code,
-            hint: error.hint
+            missingUrl: !supabaseUrl,
+            missingServiceKey: !supabaseServiceKey
           }
         },
         { status: 500 }
       );
     }
 
+    // Create Supabase client
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Test connection by getting server version
+    const { data: versionData, error: versionError } = await supabase
+      .rpc('version');
+
+    if (versionError) {
+      console.error('Supabase connection error:', {
+        message: versionError.message,
+        code: versionError.code,
+        details: versionError.details,
+        hint: versionError.hint
+      });
+      return NextResponse.json(
+        { 
+          error: 'Failed to connect to Supabase',
+          details: {
+            message: versionError.message,
+            code: versionError.code,
+            hint: versionError.hint
+          }
+        },
+        { status: 500 }
+      );
+    }
+
+    // Fetch users from the database
+    const { data: users, error: usersError } = await supabase
+      .from('users')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (usersError) {
+      console.error('Error fetching users:', {
+        message: usersError.message,
+        code: usersError.code,
+        details: usersError.details,
+        hint: usersError.hint
+      });
+      return NextResponse.json(
+        { 
+          error: 'Failed to fetch users',
+          details: {
+            message: usersError.message,
+            code: usersError.code,
+            hint: usersError.hint
+          }
+        },
+        { status: 500 }
+      );
+    }
+
+    // Return success response with users data
     return NextResponse.json({
       success: true,
-      users: users || [],
+      users,
       connection: {
         version: versionData
       }
     });
 
-  } catch (error: any) {
-    console.error('Server error:', error);
+  } catch (error: unknown) {
+    console.error('Unexpected error in users API:', error);
     return NextResponse.json(
       { 
-        error: 'Internal server error',
-        details: error.message
+        error: 'Unexpected error occurred',
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );
