@@ -19,8 +19,8 @@ const handler = NextAuth({
         // Check if the email matches the admin email
         const isAdmin = profile.email === process.env.ADMIN_EMAIL;
         
-        // Create or update user with role
-        await prisma.user.upsert({
+        // Find or create user
+        const user = await prisma.user.upsert({
           where: { email: profile.email },
           create: {
             email: profile.email,
@@ -31,6 +31,32 @@ const handler = NextAuth({
             role: isAdmin ? 'ADMIN' : 'USER',
           },
         });
+
+        // Create account link if it doesn't exist
+        const existingAccount = await prisma.account.findFirst({
+          where: {
+            provider: account.provider,
+            providerAccountId: account.providerAccountId,
+          },
+        });
+
+        if (!existingAccount) {
+          await prisma.account.create({
+            data: {
+              userId: user.id,
+              type: account.type,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              refresh_token: account.refresh_token,
+              access_token: account.access_token,
+              expires_at: account.expires_at,
+              token_type: account.token_type,
+              scope: account.scope,
+              id_token: account.id_token,
+              session_state: account.session_state,
+            },
+          });
+        }
       }
       return true;
     },
@@ -43,6 +69,7 @@ const handler = NextAuth({
   },
   pages: {
     signIn: '/auth/signin',
+    error: '/auth/error',
   },
 });
 

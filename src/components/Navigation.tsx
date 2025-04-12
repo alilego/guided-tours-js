@@ -59,9 +59,13 @@ export default function Navigation() {
                 <div className="flex items-center space-x-4">
                   <span className="text-sm text-gray-700">
                     {session.user?.name}
-                    {session.user?.role === 'ADMIN' && (
-                      <span className="ml-2 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800">
-                        Admin
+                    {session.user?.role && (
+                      <span className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
+                        session.user.role === 'ADMIN' 
+                          ? 'bg-purple-100 text-purple-800' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {session.user.role}
                       </span>
                     )}
                   </span>
@@ -188,9 +192,13 @@ export default function Navigation() {
                           <p className="text-sm font-medium text-gray-900">
                             {session.user?.name}
                           </p>
-                          {session.user?.role === 'ADMIN' && (
-                            <span className="mt-1 inline-block rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800">
-                              Admin
+                          {session.user?.role && (
+                            <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                              session.user.role === 'ADMIN' 
+                                ? 'bg-purple-100 text-purple-800' 
+                                : 'bg-green-100 text-green-800'
+                            }`}>
+                              {session.user.role}
                             </span>
                           )}
                         </div>
