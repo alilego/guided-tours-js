@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/auth';
-import { writeFile } from 'fs/promises';
-import { join } from 'path';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function POST(request: Request) {
   try {
@@ -32,14 +37,31 @@ export async function POST(request: Request) {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
     const filename = `${uniqueSuffix}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
     
-    // Save to public/uploads directory
-    const path = join(process.cwd(), 'public/uploads', filename);
-    await writeFile(path, buffer);
-    
-    // Return the URL that can be used to access the file
-    const url = `/uploads/${filename}`;
+    // Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabase
+      .storage
+      .from('tour-images')
+      .upload(filename, buffer, {
+        contentType: file.type,
+        cacheControl: '3600',
+        upsert: false
+      });
 
-    return NextResponse.json({ url });
+    if (uploadError) {
+      console.error('Error uploading to Supabase:', uploadError);
+      return NextResponse.json(
+        { error: 'Failed to upload file to storage' },
+        { status: 500 }
+      );
+    }
+
+    // Get the public URL
+    const { data: { publicUrl } } = supabase
+      .storage
+      .from('tour-images')
+      .getPublicUrl(filename);
+
+    return NextResponse.json({ url: publicUrl });
   } catch (error) {
     console.error('Error uploading file:', error);
     return NextResponse.json(

@@ -10,6 +10,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'api.unsplash.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'yokqjxcktoilamyhczdy.supabase.co',
+      },
     ],
   },
 }
