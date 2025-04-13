@@ -7,8 +7,30 @@ import Providers from '@/components/Providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Guided Tours',
+  title: 'Steps & Stories',
   description: 'Create and manage guided tours',
+  openGraph: {
+    title: 'Steps & Stories - Local Guided Tours in Romania',
+    description: 'Experience authentic local culture, unforgettable history and adventures with our carefully curated tours and expert local guides.',
+    url: 'https://tours.vladiverse.com',
+    siteName: 'Steps & Stories',
+    images: [
+      {
+        url: '/parliament-guided-tour-sunset.png',
+        width: 2070,
+        height: 1380,
+        alt: 'Palace of Parliament in Bucharest',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Steps & Stories - Local Guided Tours in Romania',
+    description: 'Experience authentic local culture, unforgettable history and adventures with our carefully curated tours and expert local guides.',
+    images: ['/parliament-guided-tour-sunset.png'],
+  },
 };
 
 export default function RootLayout({
