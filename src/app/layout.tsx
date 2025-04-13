@@ -7,6 +7,7 @@ import Providers from '@/components/Providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://tours.vladiverse.com'),
   title: 'Steps & Stories',
   description: 'Create and manage guided tours',
   openGraph: {
