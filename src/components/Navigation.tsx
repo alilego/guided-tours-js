@@ -7,10 +7,12 @@ import { Fragment } from 'react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session, status } = useSession();
+  const pathname = usePathname();
 
   return (
     <nav className="bg-white shadow">
@@ -25,30 +27,38 @@ export default function Navigation() {
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
                 href="/"
-                className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-indigo-500 hover:text-gray-700"
+                className={`${pathname === '/' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
               >
                 Home
               </Link>
               <Link
                 href="/tours"
-                className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-indigo-500 hover:text-gray-700"
+                className={`${pathname === '/tours' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
               >
                 Tours
               </Link>
               {session && (
                 <Link
                   href="/bookings"
-                  className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-indigo-500 hover:text-gray-700"
+                  className={`${pathname === '/bookings' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
                 >
                   My Bookings
                 </Link>
               )}
               <Link
                 href="/contact"
-                className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-indigo-500 hover:text-gray-700"
+                className={`${pathname === '/contact' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
               >
                 Contact
               </Link>
+              {session?.user?.role === 'ADMIN' && (
+                <Link
+                  href="/admin"
+                  className={`${pathname === '/admin' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
+                >
+                  Admin Dashboard
+                </Link>
+              )}
             </div>
           </div>
           <div className="flex items-center">
@@ -151,14 +161,14 @@ export default function Navigation() {
                     <div className="space-y-1">
                       <Link
                         href="/"
-                        className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                        className={`${pathname === '/' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-base font-medium`}
                         onClick={() => setIsOpen(false)}
                       >
                         Home
                       </Link>
                       <Link
                         href="/tours"
-                        className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                        className={`${pathname === '/tours' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-base font-medium`}
                         onClick={() => setIsOpen(false)}
                       >
                         Tours
@@ -166,7 +176,7 @@ export default function Navigation() {
                       {session && (
                         <Link
                           href="/bookings"
-                          className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                          className={`${pathname === '/bookings' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-base font-medium`}
                           onClick={() => setIsOpen(false)}
                         >
                           My Bookings
@@ -174,11 +184,20 @@ export default function Navigation() {
                       )}
                       <Link
                         href="/contact"
-                        className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                        className={`${pathname === '/contact' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-base font-medium`}
                         onClick={() => setIsOpen(false)}
                       >
                         Contact
                       </Link>
+                      {session?.user?.role === 'ADMIN' && (
+                        <Link
+                          href="/admin"
+                          className={`${pathname === '/admin' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-base font-medium`}
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Admin Dashboard
+                        </Link>
+                      )}
                     </div>
                   </nav>
                 </div>
