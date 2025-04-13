@@ -37,6 +37,12 @@ export default function Navigation() {
               >
                 Tours
               </Link>
+              <Link
+                href="/about"
+                className={`${pathname === '/about' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
+              >
+                About Us
+              </Link>
               {session && (
                 <Link
                   href="/bookings"
@@ -172,6 +178,13 @@ export default function Navigation() {
                         onClick={() => setIsOpen(false)}
                       >
                         Tours
+                      </Link>
+                      <Link
+                        href="/about"
+                        className={`${pathname === '/about' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-base font-medium`}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        About Us
                       </Link>
                       {session && (
                         <Link
