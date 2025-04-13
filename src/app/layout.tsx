@@ -17,18 +17,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className="bg-white">
+      <body className={`${inter.className} bg-white min-h-screen`}>
         <Providers>
           <Navigation />
-          <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 bg-white">
             {children}
           </main>
         </Providers>
         <footer className="bg-white border-t">
           <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
             <p className="text-center text-sm text-gray-500">
-              © {new Date().getFullYear()} Guided Tours. All rights reserved.
+              © {new Date().getFullYear()} Steps & Stories. All rights reserved.
             </p>
           </div>
         </footer>

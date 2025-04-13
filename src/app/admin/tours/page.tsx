@@ -71,7 +71,7 @@ export default function ToursPage() {
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           <Link
             href="/admin/tours/new"
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:w-auto"
           >
             Add Tour
           </Link>
@@ -144,7 +144,7 @@ export default function ToursPage() {
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                         <Link
                           href={`/admin/tours/${tour.id}`}
-                          className="text-indigo-600 hover:text-indigo-900 mr-4"
+                          className="text-emerald-600 hover:text-emerald-900 mr-4"
                         >
                           Edit
                         </Link>

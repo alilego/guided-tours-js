@@ -20,47 +20,48 @@ export default function Navigation() {
         <div className="flex h-16 justify-between">
           <div className="flex">
             <div className="flex flex-shrink-0 items-center">
-              <Link href="/" className="text-xl font-bold text-indigo-600">
-                Guided Tours
+              <Link href="/" className="flex flex-col">
+                <span className="text-xl font-bold text-emerald-600">Steps & Stories</span>
+                <span className="text-xs text-gray-500">Local Guided Tours in Romania</span>
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-8">
               <Link
                 href="/"
-                className={`${pathname === '/' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
+                className={`${pathname === '/' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
               >
                 Home
               </Link>
               <Link
                 href="/tours"
-                className={`${pathname === '/tours' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
+                className={`${pathname === '/tours' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
               >
                 Tours
               </Link>
               <Link
                 href="/about"
-                className={`${pathname === '/about' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
+                className={`${pathname === '/about' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
               >
                 About Us
               </Link>
               {session && (
                 <Link
                   href="/bookings"
-                  className={`${pathname === '/bookings' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
+                  className={`${pathname === '/bookings' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
                 >
                   My Bookings
                 </Link>
               )}
               <Link
                 href="/contact"
-                className={`${pathname === '/contact' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
+                className={`${pathname === '/contact' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
               >
                 Contact
               </Link>
               {session?.user?.role === 'ADMIN' && (
                 <Link
                   href="/admin"
-                  className={`${pathname === '/admin' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
+                  className={`${pathname === '/admin' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
                 >
                   Admin Dashboard
                 </Link>
@@ -95,7 +96,7 @@ export default function Navigation() {
               ) : (
                 <Link
                   href="/auth/signin"
-                  className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                  className="inline-flex items-center rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
                 >
                   <Image
                     src="/google.svg"
@@ -149,8 +150,9 @@ export default function Navigation() {
             >
               <Dialog.Panel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-white pb-12 pt-5 shadow-xl">
                 <div className="flex items-center justify-between px-4">
-                  <Link href="/" className="text-xl font-bold text-indigo-600">
-                    Guided Tours
+                  <Link href="/" className="flex flex-col">
+                    <span className="text-xl font-bold text-emerald-600">Steps & Stories</span>
+                    <span className="text-xs text-gray-500">Local Guided Tours in Romania</span>
                   </Link>
                   <button
                     type="button"
@@ -167,21 +169,21 @@ export default function Navigation() {
                     <div className="flex flex-col space-y-2">
                       <Link
                         href="/"
-                        className={`${pathname === '/' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
+                        className={`${pathname === '/' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
                         onClick={() => setIsOpen(false)}
                       >
                         Home
                       </Link>
                       <Link
                         href="/tours"
-                        className={`${pathname === '/tours' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
+                        className={`${pathname === '/tours' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
                         onClick={() => setIsOpen(false)}
                       >
                         Tours
                       </Link>
                       <Link
                         href="/about"
-                        className={`${pathname === '/about' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
+                        className={`${pathname === '/about' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
                         onClick={() => setIsOpen(false)}
                       >
                         About Us
@@ -189,7 +191,7 @@ export default function Navigation() {
                       {session && (
                         <Link
                           href="/bookings"
-                          className={`${pathname === '/bookings' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
+                          className={`${pathname === '/bookings' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
                           onClick={() => setIsOpen(false)}
                         >
                           My Bookings
@@ -197,7 +199,7 @@ export default function Navigation() {
                       )}
                       <Link
                         href="/contact"
-                        className={`${pathname === '/contact' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
+                        className={`${pathname === '/contact' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
                         onClick={() => setIsOpen(false)}
                       >
                         Contact
@@ -205,7 +207,7 @@ export default function Navigation() {
                       {session?.user?.role === 'ADMIN' && (
                         <Link
                           href="/admin"
-                          className={`${pathname === '/admin' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
+                          className={`${pathname === '/admin' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
                           onClick={() => setIsOpen(false)}
                         >
                           Admin Dashboard
@@ -247,7 +249,7 @@ export default function Navigation() {
                     ) : (
                       <Link
                         href="/auth/signin"
-                        className="flex items-center justify-center rounded-md bg-indigo-600 px-3 py-2 text-base font-medium text-white hover:bg-indigo-700"
+                        className="flex items-center justify-center rounded-md bg-emerald-600 px-3 py-2 text-base font-medium text-white hover:bg-emerald-700"
                         onClick={() => setIsOpen(false)}
                       >
                         <Image
