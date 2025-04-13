@@ -164,24 +164,24 @@ export default function Navigation() {
 
                 <div className="mt-2">
                   <nav className="bg-white px-4 py-3">
-                    <div className="space-y-1">
+                    <div className="flex flex-col space-y-2">
                       <Link
                         href="/"
-                        className={`${pathname === '/' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-base font-medium`}
+                        className={`${pathname === '/' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
                         onClick={() => setIsOpen(false)}
                       >
                         Home
                       </Link>
                       <Link
                         href="/tours"
-                        className={`${pathname === '/tours' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-base font-medium`}
+                        className={`${pathname === '/tours' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
                         onClick={() => setIsOpen(false)}
                       >
                         Tours
                       </Link>
                       <Link
                         href="/about"
-                        className={`${pathname === '/about' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-base font-medium`}
+                        className={`${pathname === '/about' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
                         onClick={() => setIsOpen(false)}
                       >
                         About Us
@@ -189,7 +189,7 @@ export default function Navigation() {
                       {session && (
                         <Link
                           href="/bookings"
-                          className={`${pathname === '/bookings' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-base font-medium`}
+                          className={`${pathname === '/bookings' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
                           onClick={() => setIsOpen(false)}
                         >
                           My Bookings
@@ -197,7 +197,7 @@ export default function Navigation() {
                       )}
                       <Link
                         href="/contact"
-                        className={`${pathname === '/contact' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-base font-medium`}
+                        className={`${pathname === '/contact' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
                         onClick={() => setIsOpen(false)}
                       >
                         Contact
@@ -205,7 +205,7 @@ export default function Navigation() {
                       {session?.user?.role === 'ADMIN' && (
                         <Link
                           href="/admin"
-                          className={`${pathname === '/admin' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-base font-medium`}
+                          className={`${pathname === '/admin' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} block w-full rounded-md px-3 py-2 text-base font-medium`}
                           onClick={() => setIsOpen(false)}
                         >
                           Admin Dashboard
