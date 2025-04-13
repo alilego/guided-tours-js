@@ -1,49 +1,67 @@
-# Guided Tours Platform
+# Steps & Stories - Guided Tours Platform
 
-A Next.js-based platform for discovering and booking guided tours. Built with modern web technologies and best practices.
+A modern web application for creating, managing, and booking guided tours. Built with Next.js, Supabase, and NextAuth.js.
+
+## Features
+
+- **User Authentication**: Google Sign-In integration with NextAuth.js
+- **Role-Based Access Control**: Admin and user roles with different permissions
+- **Tour Management**: Create, edit, and delete tours with detailed information
+- **Booking System**: Users can book tours and manage their bookings
+- **Responsive Design**: Mobile-friendly interface with a clean, modern UI
+- **Social Media Integration**: Optimized for sharing on platforms like WhatsApp and Facebook
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15, React, Tailwind CSS
+- **Frontend**: Next.js 14, React, Tailwind CSS
+- **Authentication**: NextAuth.js with Google provider
 - **Database**: Supabase (PostgreSQL)
 - **ORM**: Prisma
-- **Deployment**: Vercel
-- **CI/CD**: GitHub Actions
+- **Deployment**: Vercel with GitHub Actions
+- **Styling**: Tailwind CSS with emerald color scheme
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 20 or later
-- npm or yarn
+- Node.js 18+ and npm
+- Google OAuth credentials
 - Git
 - A Supabase account
 - A Vercel account
 
-### Local Development
+### Environment Variables
 
-1. Clone the repository:
-   ```bash
+Create a `.env.local` file with the following variables:
+
+```
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_nextauth_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+DATABASE_URL=your_supabase_database_url
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+NEXT_PUBLIC_BASE_URL=https://your-production-domain.com
+```
+
+### Installation
+
+1. Clone the repository
+```bash
    git clone https://github.com/alilego/guided-tours-js.git
    cd guided-tours-js
    ```
-
 2. Install dependencies:
    ```bash
    npm install
    ```
-
-3. Set up environment variables:
-   ```bash
-   cp .env.example .env
-   ```
-   Update the `.env` file with your own values.
-
-4. Start the development server:
+3. Run the development server:
    ```bash
    npm run dev
    ```
-   Open [http://localhost:3000](http://localhost:3000) to view the app.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ### Database Setup
 
@@ -95,7 +113,8 @@ guided-tours-js/
 │   │   ├── page.tsx      # Home page
 │   │   ├── layout.tsx    # Root layout
 │   │   └── globals.css   # Global styles
-│   └── components/       # React components
+│   ├── components/       # React components
+│   └── lib/              # Utility functions and database helpers
 ├── prisma/
 │   └── schema.prisma     # Database schema
 ├── public/              # Static assets
@@ -127,21 +146,53 @@ guided-tours-js/
    - Add new variables to both local and Vercel environments
    - Store sensitive data in GitHub Secrets for deployment
 
-## Learn More
+## Key Features Implementation
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Prisma Documentation](https://www.prisma.io/docs)
-- [Supabase Documentation](https://supabase.com/docs)
-- [Vercel Documentation](https://vercel.com/docs)
+### Authentication
 
-## Contributing
+- Google Sign-In integration with NextAuth.js
+- Role-based access control (admin vs regular users)
+- Protected routes for admin dashboard
 
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+### Tour Management
+
+- CRUD operations for tours
+- Image upload functionality
+- Tour details including title, description, date, duration, price, and max participants
+
+### Booking System
+
+- Users can book available tours
+- Booking management for users
+- Booking overview for admins
+
+### UI/UX
+
+- Responsive design with Tailwind CSS
+- Emerald color scheme for a fresh, modern look
+- Intuitive navigation and user flows
+
+### Social Media Sharing
+
+- Open Graph meta tags for optimized sharing on social media
+- Custom featured image for social media previews
+- Environment-based configuration for development and production
+
+## Deployment
+
+The application is configured for deployment on Vercel with GitHub Actions:
+
+1. Push changes to the main branch
+2. GitHub Actions automatically builds and deploys to Vercel
+3. Environment variables are securely managed in Vercel
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgements
+
+- Next.js team for the amazing framework
+- Supabase for the backend infrastructure
+- NextAuth.js for authentication
+- Tailwind CSS for styling

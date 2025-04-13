@@ -7,13 +7,13 @@ import Providers from '@/components/Providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://tours.vladiverse.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
   title: 'Steps & Stories',
   description: 'Create and manage guided tours',
   openGraph: {
     title: 'Steps & Stories - Local Guided Tours in Romania',
     description: 'Experience authentic local culture, unforgettable history and adventures with our carefully curated tours and expert local guides.',
-    url: 'https://tours.vladiverse.com',
+    url: '/',
     siteName: 'Steps & Stories',
     images: [
       {
