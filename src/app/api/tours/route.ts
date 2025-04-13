@@ -25,15 +25,7 @@ const createTourSchema = z.object({
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
+    // Remove authentication check to allow public access
     const tours = await prisma.tour.findMany({
       orderBy: {
         createdAt: 'desc',
