@@ -3,7 +3,10 @@ import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
 
-export async function GET() {
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -11,15 +14,20 @@ export async function GET() {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const users = await prisma.user.findMany({
-      orderBy: {
-        email: 'asc',
-      },
+    const { role } = await request.json();
+
+    if (!['USER', 'GUIDE', 'ADMIN'].includes(role)) {
+      return new NextResponse('Invalid role', { status: 400 });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: params.id },
+      data: { role },
     });
 
-    return NextResponse.json({ users });
+    return NextResponse.json(updatedUser);
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error('Error updating user role:', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 } 

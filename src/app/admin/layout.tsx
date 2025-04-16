@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import Link from 'next/link';
 
 export default function AdminLayout({
   children,
@@ -49,18 +50,24 @@ export default function AdminLayout({
                 <span className="text-xl font-bold text-emerald-900">Admin Dashboard</span>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <a
+                <Link
+                  href="/admin/users"
+                  className="border-transparent text-emerald-600 hover:border-emerald-300 hover:text-emerald-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Users
+                </Link>
+                <Link
                   href="/admin/tours"
                   className="border-transparent text-emerald-600 hover:border-emerald-300 hover:text-emerald-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Tours
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/admin/tours/new"
                   className="border-transparent text-emerald-600 hover:border-emerald-300 hover:text-emerald-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Add Tour
-                </a>
+                </Link>
               </div>
             </div>
             <div className="flex items-center">
