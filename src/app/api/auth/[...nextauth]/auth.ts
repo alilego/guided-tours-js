@@ -14,7 +14,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, user }) {
       if (session.user) {
-        session.user.role = user.role;
+        session.user.role = user.role || 'USER';
       }
       return session;
     },
