@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { authOptions } from '../api/auth/[...nextauth]/auth';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 interface Tour {
   id: string;
@@ -58,13 +59,21 @@ export default async function MyToursPage() {
   const tours = await prisma.tour.findMany({
     where: {
       creatorId: user.id
-    },
+    } as Prisma.TourWhereInput,
     orderBy: {
       createdAt: 'desc',
     },
     include: {
-      creator: true
-    }
+      creator: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      bookings: true,
+      Review: true,
+    } as Prisma.TourInclude,
   });
   console.log('✅ Found tours:', { count: tours.length });
 

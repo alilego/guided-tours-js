@@ -76,9 +76,10 @@ export default async function TourDetailPage({
         {/* Description */}
         <div className="mt-10">
           <h3 className="text-xl font-semibold text-gray-900 mb-3">Description</h3>
-          <div className="space-y-6 text-base text-gray-700">
-            {tour.description}
-          </div>
+          <div 
+            className="prose prose-emerald max-w-none text-base text-gray-700"
+            dangerouslySetInnerHTML={{ __html: tour.description }}
+          />
         </div>
 
         {/* Date and Booking Button */}
