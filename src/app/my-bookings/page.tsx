@@ -130,32 +130,32 @@ export default function MyBookingsPage() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {bookings.map((booking) => {
-            // Safely handle potentially undefined values
-            const currentParticipants = booking.tour?.bookings?.length || 0;
-            const formattedDate = booking.tour?.date ? format(new Date(booking.tour.date), 'MMMM d, yyyy') : 'Date not available';
+            const currentParticipants = booking.tour.bookings.length;
 
             return (
               <div key={booking.id} className="overflow-hidden rounded-lg bg-white shadow">
                 <div className="relative h-48">
                   <Image
-                    src={booking.tour?.imageUrl || '/placeholder-image.jpg'}
-                    alt={booking.tour?.title || 'Tour'}
+                    src={booking.tour.imageUrl}
+                    alt={booking.tour.title}
                     fill
                     className="object-cover"
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900">{booking.tour?.title || 'Tour Title Not Available'}</h3>
+                  <h3 className="text-xl font-semibold text-gray-900">{booking.tour.title}</h3>
                   <div className="mt-2 space-y-2">
-                    <p className="text-gray-600">Date: {formattedDate}</p>
-                    <p className="text-emerald-600">Price: €{booking.tour?.price || 0}</p>
                     <p className="text-gray-600">
-                      Participants: {currentParticipants} out of {booking.tour?.maxParticipants || 0}
+                      Date: {format(new Date(booking.tour.date), 'MMMM d, yyyy')}
+                    </p>
+                    <p className="text-emerald-600">Price: €{booking.tour.price}</p>
+                    <p className="text-gray-600">
+                      Participants: {currentParticipants} out of {booking.tour.maxParticipants}
                     </p>
                   </div>
                   <div className="mt-4 flex space-x-3">
                     <Link
-                      href={`/tours/${booking.tour?.id}`}
+                      href={`/tours/${booking.tour.id}`}
                       className="flex-1 rounded-md bg-emerald-100 px-4 py-2 text-center text-sm font-medium text-emerald-700 hover:bg-emerald-200"
                     >
                       View Details

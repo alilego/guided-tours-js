@@ -65,32 +65,21 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const tourId = searchParams.get('tourId');
-
-    const where = {
-      userId: session.user.id,
-      ...(tourId ? { tourId } : {}),
-    };
-
     const bookings = await prisma.booking.findMany({
-      where,
+      where: {
+        userId: session.user.id,
+      },
       include: {
         tour: {
-          select: {
-            id: true,
-            title: true,
-            imageUrl: true,
-            date: true,
-            duration: true,
-            price: true,
+          include: {
+            bookings: true,
           },
         },
       },
@@ -102,9 +91,6 @@ export async function GET(request: Request) {
     return NextResponse.json(bookings);
   } catch (error) {
     console.error('Error fetching bookings:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch bookings' },
-      { status: 500 }
-    );
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 } 

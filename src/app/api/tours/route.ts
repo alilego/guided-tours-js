@@ -25,20 +25,19 @@ const createTourSchema = z.object({
 
 export async function GET() {
   try {
-    // Remove authentication check to allow public access
     const tours = await prisma.tour.findMany({
+      include: {
+        bookings: true,
+      },
       orderBy: {
-        createdAt: 'desc',
+        date: 'asc',
       },
     });
 
     return NextResponse.json(tours);
   } catch (error) {
     console.error('Error fetching tours:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch tours' },
-      { status: 500 }
-    );
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
 
