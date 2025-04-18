@@ -45,6 +45,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    console.log('🔄 Form field changed:', { name, value });
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -55,6 +56,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
+    console.log('📝 Submitting tour update:', formData);
 
     try {
       const response = await fetch(`/api/tours/${params.id}`, {
@@ -66,12 +68,15 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
       });
 
       if (!response.ok) {
+        console.error('❌ Failed to update tour:', response.status, response.statusText);
         throw new Error('Failed to update tour');
       }
 
+      console.log('✅ Tour updated successfully');
       router.refresh();
       router.push('/my-tours');
     } catch (err) {
+      console.error('❌ Error updating tour:', err);
       setError(err instanceof Error ? err.message : 'Failed to update tour');
     } finally {
       setIsSubmitting(false);
@@ -81,18 +86,25 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     if (status === 'loading') return;
 
+    console.log('🔄 Session status:', status);
+    console.log('👤 Current session:', session);
+
     if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'GUIDE')) {
+      console.log('⚠️ Unauthorized access, redirecting to home');
       router.push('/');
       return;
     }
 
     const fetchTour = async () => {
       try {
+        console.log('🔍 Fetching tour details for ID:', params.id);
         const response = await fetch(`/api/tours/${params.id}`);
         if (!response.ok) {
+          console.error('❌ Failed to fetch tour:', response.status, response.statusText);
           throw new Error('Failed to fetch tour');
         }
         const tour = await response.json();
+        console.log('✅ Fetched tour successfully:', tour);
         
         // Format date for datetime-local input
         const formattedDate = new Date(tour.date).toISOString().slice(0, 16);
@@ -108,6 +120,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
         });
         setImagePreview(tour.imageUrl);
       } catch (err) {
+        console.error('❌ Error fetching tour:', err);
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setIsLoading(false);

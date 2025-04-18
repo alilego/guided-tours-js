@@ -5,14 +5,15 @@
  * Route: /my-tours
  */
 
-'use client';
+export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { authOptions } from '../api/auth/[...nextauth]/auth';
+import { prisma } from '@/lib/prisma';
 
 interface Tour {
   id: string;
@@ -26,54 +27,46 @@ interface Tour {
   createdAt: string;
 }
 
-export default function MyToursPage() {
-  const router = useRouter();
-  const { data: session, status } = useSession();
-  const [tours, setTours] = useState<Tour[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default async function MyToursPage() {
+  console.log('🎯 Rendering MyToursPage');
+  const session = await getServerSession(authOptions);
+  console.log('🔐 Session state:', { 
+    authenticated: !!session, 
+    email: session?.user?.email 
+  });
 
-  useEffect(() => {
-    if (status === 'loading') return;
+  if (!session?.user?.email) {
+    console.log('❌ No session - redirecting to home');
+    redirect('/');
+  }
 
-    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'GUIDE')) {
-      router.push('/');
-      return;
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
+  console.log('👤 User found:', { 
+    id: user?.id, 
+    email: user?.email, 
+    role: user?.role 
+  });
+
+  if (!user || (user.role !== 'ADMIN' && user.role !== 'GUIDE')) {
+    console.log('❌ Unauthorized role - redirecting to home');
+    redirect('/');
+  }
+
+  console.log('🔍 Fetching tours for user:', user.id);
+  const tours = await prisma.tour.findMany({
+    where: {
+      creatorId: user.id
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    include: {
+      creator: true
     }
-
-    const fetchTours = async () => {
-      try {
-        const response = await fetch('/api/tours/my-tours');
-        if (!response.ok) {
-          throw new Error('Failed to fetch tours');
-        }
-        const data = await response.json();
-        setTours(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTours();
-  }, [session, status, router]);
-
-  if (status === 'loading' || isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-red-600">{error}</div>
-      </div>
-    );
-  }
+  });
+  console.log('✅ Found tours:', { count: tours.length });
 
   return (
     <div className="bg-white">
