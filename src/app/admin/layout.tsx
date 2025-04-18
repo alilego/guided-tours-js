@@ -62,12 +62,6 @@ export default function AdminLayout({
                 >
                   Tours
                 </Link>
-                <Link
-                  href="/admin/tours/new"
-                  className="border-transparent text-emerald-600 hover:border-emerald-300 hover:text-emerald-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Add Tour
-                </Link>
               </div>
             </div>
             <div className="flex items-center">

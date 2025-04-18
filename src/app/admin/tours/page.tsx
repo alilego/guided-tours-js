@@ -1,7 +1,7 @@
 /**
  * Admin Tours List Page
  * Displays a list of all tours in the system and allows admins to manage them.
- * Features include viewing tour details, adding new tours, and deleting existing ones.
+ * Features include viewing tour details and deleting existing ones.
  * Route: /admin/tours
  */
 
@@ -10,6 +10,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface Tour {
   id: string;
@@ -25,30 +26,77 @@ interface Tour {
 
 export default function ToursPage() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [tours, setTours] = useState<Tour[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [tourToDelete, setTourToDelete] = useState<Tour | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const fetchTours = async () => {
+    try {
+      const response = await fetch('/api/tours', {
+        cache: 'no-store'
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch tours');
+      }
+
+      setTours(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTours = async () => {
-      try {
-        const response = await fetch('/api/tours');
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch tours');
-        }
-
-        setTours(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchTours();
   }, []);
+
+  const handleDeleteClick = (tour: Tour) => {
+    setTourToDelete(tour);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!tourToDelete) return;
+    
+    setIsDeleting(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`/api/tours/${tourToDelete.id}`, {
+        method: 'DELETE',
+        cache: 'no-store'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete tour');
+      }
+
+      // Remove the deleted tour from the state
+      setTours(tours.filter(tour => tour.id !== tourToDelete.id));
+      setShowDeleteConfirm(false);
+      setTourToDelete(null);
+
+      // Revalidate and refresh all tour-related pages
+      router.refresh();
+      
+      // Force revalidation of the my-tours page
+      await fetch('/api/revalidate?path=/my-tours');
+      await fetch('/api/revalidate?path=/tours');
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete tour');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -75,15 +123,13 @@ export default function ToursPage() {
             A list of all tours in the system.
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <Link
-            href="/admin/tours/new"
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:w-auto"
-          >
-            Add Tour
-          </Link>
-        </div>
       </div>
+
+      {error && (
+        <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
+          {error}
+        </div>
+      )}
 
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -156,9 +202,7 @@ export default function ToursPage() {
                           Edit
                         </Link>
                         <button
-                          onClick={() => {
-                            // Handle delete
-                          }}
+                          onClick={() => handleDeleteClick(tour)}
                           className="text-red-600 hover:text-red-900"
                         >
                           Delete
@@ -172,6 +216,42 @@ export default function ToursPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && tourToDelete && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Delete Tour
+            </h3>
+            <p className="text-sm text-gray-500 mb-6">
+              Are you sure you want to delete "{tourToDelete.title}"? This action cannot be undone.
+              All bookings and reviews associated with this tour will also be deleted.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setTourToDelete(null);
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+              >
+                {isDeleting ? 'Deleting...' : 'Yes, Delete Tour'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
