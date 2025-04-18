@@ -8,8 +8,8 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { format } from 'date-fns';
-import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
+import BookingButton from './components/BookingButton';
 
 export default async function TourDetailPage({
   params,
@@ -18,6 +18,15 @@ export default async function TourDetailPage({
 }) {
   const tour = await prisma.tour.findUnique({
     where: { id: params.id },
+    include: {
+      bookings: true,
+      creator: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
   });
 
   if (!tour) {
@@ -25,6 +34,7 @@ export default async function TourDetailPage({
   }
 
   const formattedDate = format(new Date(tour.date), 'MMMM d, yyyy');
+  const currentParticipants = tour.bookings.length;
 
   return (
     <div className="bg-white">
@@ -67,7 +77,16 @@ export default async function TourDetailPage({
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-emerald-600 mr-2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                 </svg>
-                <span className="text-gray-700">Maximum Group Size: {tour.maxParticipants} people</span>
+                <span className="text-gray-700">
+                  Participants: {currentParticipants} out of {tour.maxParticipants}
+                </span>
+              </div>
+
+              <div className="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-emerald-600 mr-2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+                <span className="text-gray-700">Guide: {tour.creator.name}</span>
               </div>
             </div>
           </div>
@@ -92,12 +111,7 @@ export default async function TourDetailPage({
               <span className="text-gray-700">Date: {formattedDate}</span>
             </div>
 
-            <Link
-              href={`/tours/${tour.id}/book`}
-              className="rounded-md border border-transparent bg-emerald-600 px-8 py-3 text-base font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-            >
-              Book This Tour
-            </Link>
+            <BookingButton tourId={tour.id} />
           </div>
         </div>
       </div>

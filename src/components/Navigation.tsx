@@ -19,6 +19,13 @@ import { useSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
+const userNavigation = [
+  { name: 'My Profile', href: '/profile' },
+  { name: 'My Tours', href: '/my-tours' },
+  { name: 'My Bookings', href: '/my-bookings' },
+  { name: 'Sign out', href: '#' },
+];
+
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session, status } = useSession();
@@ -58,8 +65,8 @@ export default function Navigation() {
               )}
               {session && (
                 <Link
-                  href="/bookings"
-                  className={`${pathname === '/bookings' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
+                  href="/my-bookings"
+                  className={`${pathname === '/my-bookings' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
                 >
                   My Bookings
                 </Link>
@@ -195,8 +202,8 @@ export default function Navigation() {
                     )}
                     {session && (
                       <Link
-                        href="/bookings"
-                        className={`${pathname === '/bookings' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} block rounded-md px-3 py-2 text-base font-medium`}
+                        href="/my-bookings"
+                        className={`${pathname === '/my-bookings' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} block rounded-md px-3 py-2 text-base font-medium`}
                         onClick={() => setIsOpen(false)}
                       >
                         My Bookings

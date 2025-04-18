@@ -116,7 +116,7 @@ export default async function MyToursPage() {
                     <h3 className="text-sm font-medium text-gray-900">
                       {tour.title}
                     </h3>
-                    <p className="text-sm font-medium text-gray-900">€{tour.price}</p>
+                    <p className="text-sm font-medium text-emerald-600">€{tour.price}</p>
                   </div>
                   <p className="mt-1 text-sm text-gray-500">
                     {format(new Date(tour.date), 'MMMM d, yyyy')}

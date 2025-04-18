@@ -4,64 +4,114 @@ import { authOptions } from '../../auth/[...nextauth]/auth';
 import { prisma } from '@/lib/prisma';
 import { TourUpdateInput } from '@/types/tour';
 
+interface TourWithCreatorId extends TourUpdateInput {
+  id: string;
+  creatorId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const tour = await prisma.tour.findUnique({
+      where: { id: params.id },
+    }) as TourWithCreatorId;
+
+    if (!tour) {
+      return NextResponse.json(
+        { error: 'Tour not found' },
+        { status: 404 }
+      );
+    }
+
+    // Get bookings count
+    const bookingsCount = await prisma.booking.count({
+      where: { tourId: params.id },
+    });
+
+    // Get creator info
+    const creator = await prisma.user.findUnique({
+      where: { id: tour.creatorId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        role: true,
+      },
+    });
+
+    // Combine the data
+    const tourData = {
+      ...tour,
+      bookingsCount,
+      creator,
+    };
+
+    return NextResponse.json(tourData);
+  } catch (error) {
+    console.error('Error fetching tour:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch tour' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  console.log('📝 PATCH request received for tour:', params.id);
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      console.log('❌ Unauthorized: No session or email');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
-    console.log('👤 User found:', { email: user?.email, role: user?.role });
 
     if (!user || (user.role !== 'ADMIN' && user.role !== 'GUIDE')) {
-      console.log('❌ Unauthorized: Invalid role');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const tour = await prisma.tour.findUnique({
       where: { id: params.id },
-    });
-    console.log('🔍 Existing tour found:', tour);
+    }) as TourWithCreatorId;
 
     if (!tour) {
-      console.log('❌ Tour not found');
       return NextResponse.json({ error: 'Tour not found' }, { status: 404 });
     }
 
-    const data = (await request.json()) as TourUpdateInput;
-    console.log('📦 Update data received:', data);
+    // Ensure the user owns this tour
+    if (tour.creatorId !== user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
 
-    // Convert string inputs to appropriate types
-    const updateData = {
-      title: data.title,
-      description: data.description,
-      duration: data.duration ? parseInt(data.duration.toString()) : undefined,
-      maxParticipants: data.maxParticipants ? parseInt(data.maxParticipants.toString()) : undefined,
-      date: data.date ? new Date(data.date) : undefined,
-      price: data.price,
-      imageUrl: data.imageUrl,
-    };
-    console.log('🔄 Processed update data:', updateData);
+    const data = await request.json() as TourUpdateInput;
 
     const updatedTour = await prisma.tour.update({
       where: { id: params.id },
-      data: updateData,
+      data: {
+        title: data.title,
+        description: data.description,
+        price: data.price,
+        duration: data.duration,
+        date: data.date ? new Date(data.date) : undefined,
+        maxParticipants: data.maxParticipants,
+        imageUrl: data.imageUrl,
+      },
     });
-    console.log('✅ Tour updated successfully:', updatedTour);
 
     return NextResponse.json(updatedTour);
   } catch (error) {
-    console.error('❌ Error updating tour:', error);
+    console.error('Error updating tour:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error' },
+      { error: 'Failed to update tour' },
       { status: 500 }
     );
   }
@@ -71,48 +121,43 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  console.log('🗑️ DELETE request received for tour:', params.id);
   try {
     const session = await getServerSession(authOptions);
-
     if (!session?.user?.email) {
-      console.log('❌ Unauthorized: No session or email');
-      return new NextResponse('Unauthorized', { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
-    console.log('👤 User found:', { email: user?.email, role: user?.role });
 
     if (!user || (user.role !== 'ADMIN' && user.role !== 'GUIDE')) {
-      console.log('❌ Unauthorized: Invalid role');
-      return new NextResponse('Unauthorized', { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const tour = await prisma.tour.findUnique({
       where: { id: params.id },
-    });
-    console.log('🔍 Tour to delete:', tour);
+    }) as TourWithCreatorId;
 
     if (!tour) {
-      console.log('❌ Tour not found');
-      return new NextResponse('Tour not found', { status: 404 });
+      return NextResponse.json({ error: 'Tour not found' }, { status: 404 });
     }
 
+    // Ensure the user owns this tour
     if (tour.creatorId !== user.id) {
-      console.log('❌ Unauthorized: User is not the tour creator');
-      return new NextResponse('Unauthorized', { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     await prisma.tour.delete({
       where: { id: params.id },
     });
-    console.log('✅ Tour deleted successfully');
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    console.error('❌ Error deleting tour:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.error('Error deleting tour:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete tour' },
+      { status: 500 }
+    );
   }
 } 

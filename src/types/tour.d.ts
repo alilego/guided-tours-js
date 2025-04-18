@@ -21,8 +21,9 @@ export interface TourUpdateInput {
   title?: string;
   description?: string;
   price?: number;
-  duration?: number | string;
-  date?: Date | string;
-  maxParticipants?: number | string;
+  duration?: number;
+  date?: string | Date;
+  maxParticipants?: number;
   imageUrl?: string;
+  creatorId?: string;
 } 
