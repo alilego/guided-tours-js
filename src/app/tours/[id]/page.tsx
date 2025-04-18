@@ -1,3 +1,10 @@
+/**
+ * Tour Detail Page
+ * Displays detailed information about a specific tour, including itinerary,
+ * pricing, dates, and booking options.
+ * Route: /tours/[id]
+ */
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { format } from 'date-fns';

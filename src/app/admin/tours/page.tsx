@@ -1,3 +1,10 @@
+/**
+ * Admin Tours List Page
+ * Displays a list of all tours in the system and allows admins to manage them.
+ * Features include viewing tour details, adding new tours, and deleting existing ones.
+ * Route: /admin/tours
+ */
+
 'use client';
 
 import { useEffect, useState } from 'react';

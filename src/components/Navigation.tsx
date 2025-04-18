@@ -1,3 +1,13 @@
+/**
+ * Navigation Component
+ * Main navigation bar component that handles both desktop and mobile navigation.
+ * Features:
+ * - Responsive design with mobile menu
+ * - User authentication status display
+ * - Role-based navigation items
+ * - Dynamic active link highlighting
+ */
+
 'use client';
 
 import { useState } from 'react';

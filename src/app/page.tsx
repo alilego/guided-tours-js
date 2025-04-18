@@ -1,6 +1,12 @@
+/**
+ * Home Page
+ * Landing page of the application showcasing featured tours and main call-to-action.
+ * Route: /
+ */
+
 import Image from "next/image";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <div className="space-y-12">
       {/* Hero Section */}

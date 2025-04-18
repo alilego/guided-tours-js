@@ -1,3 +1,12 @@
+/**
+ * Footer Component
+ * Site-wide footer component with navigation links and copyright information.
+ * Features:
+ * - Dynamic year display
+ * - Active link highlighting
+ * - Responsive layout
+ */
+
 'use client';
 
 import Link from 'next/link';

@@ -1,3 +1,9 @@
+/**
+ * Tours List Page
+ * Displays all available tours with filtering and sorting options.
+ * Route: /tours
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -16,7 +22,7 @@ interface Tour {
   price: number;
 }
 
-export default function ToursPage() {
+export default function ToursListPage() {
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

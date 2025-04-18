@@ -1,3 +1,13 @@
+/**
+ * User Role Editor Component
+ * A dropdown component for managing user roles in the system.
+ * Features:
+ * - Role selection between USER, GUIDE, and ADMIN
+ * - Immediate role updates via API
+ * - Loading state handling
+ * - Error handling with role reversion
+ */
+
 'use client';
 
 import { useState } from 'react';

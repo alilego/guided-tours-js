@@ -1,3 +1,10 @@
+/**
+ * New Tour Page
+ * Admin interface for creating new tours in the system.
+ * Features include form fields for tour details, image upload, and validation.
+ * Route: /admin/tours/new
+ */
+
 'use client';
 
 import { useState, useRef } from 'react';

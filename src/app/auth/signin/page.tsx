@@ -1,3 +1,10 @@
+/**
+ * Sign In Page
+ * Authentication page that handles user sign-in through Google OAuth.
+ * Includes error handling and callback URL support.
+ * Route: /auth/signin
+ */
+
 'use client';
 
 import { signIn } from 'next-auth/react';

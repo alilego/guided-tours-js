@@ -1,3 +1,9 @@
+/**
+ * About Page
+ * Provides information about the company, mission, and team.
+ * Route: /about
+ */
+
 import Image from 'next/image';
 
 export default function AboutPage() {

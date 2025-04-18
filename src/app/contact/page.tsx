@@ -1,3 +1,9 @@
+/**
+ * Contact Page
+ * Contact form and information for users to get in touch.
+ * Route: /contact
+ */
+
 import Image from 'next/image';
 
 export default function ContactPage() {
