@@ -45,10 +45,10 @@ export async function GET() {
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
 
-  // Check if user is authenticated and is an admin
-  if (!session || session.user.role !== 'ADMIN') {
+  // Check if user is authenticated and has appropriate role
+  if (!session?.user?.email || !session.user.role || (session.user.role !== 'ADMIN' && session.user.role !== 'GUIDE')) {
     return NextResponse.json(
-      { error: 'Unauthorized - Admin access required' },
+      { error: 'Unauthorized - Admin or Guide access required' },
       { status: 403 }
     );
   }
@@ -58,6 +58,18 @@ export async function POST(request: Request) {
     
     // Validate the data
     const validatedData = createTourSchema.parse(data);
+
+    // Get the user
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
     
     // Create new tour
     const tour = await prisma.tour.create({
@@ -69,6 +81,7 @@ export async function POST(request: Request) {
         date: validatedData.date,
         maxParticipants: validatedData.maxParticipants,
         imageUrl: validatedData.imageUrl,
+        creatorId: user.id,
       },
     });
 

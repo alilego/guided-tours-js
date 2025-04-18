@@ -57,6 +57,7 @@ model User {
   sessions      Session[]
   bookings      Booking[]
   Review        Review[]
+  createdTours  Tour[]    @relation("CreatedTours")
 }
 
 model VerificationToken {
@@ -78,8 +79,12 @@ model Tour {
   imageUrl        String
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  creator         User      @relation("CreatedTours", fields: [creatorId], references: [id])
+  creatorId       String
   bookings        Booking[]
   Review          Review[]
+
+  @@index([creatorId])
 }
 
 model Booking {
