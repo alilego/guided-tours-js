@@ -122,4 +122,48 @@ export async function PATCH(
     const errorMessage = error instanceof Error ? error.message : 'Internal Server Error';
     return new NextResponse(`Error updating tour: ${errorMessage}`, { status: 500 });
   }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'GUIDE')) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    // First verify the tour exists and belongs to the user
+    const existingTour = await prisma.tour.findFirst({
+      where: {
+        id: params.id,
+        creatorId: user.id,
+      } as Prisma.TourWhereInput,
+    });
+
+    if (!existingTour) {
+      return new NextResponse('Tour not found or unauthorized', { status: 404 });
+    }
+
+    // Delete the tour and all related records (bookings and reviews will be cascade deleted)
+    await prisma.tour.delete({
+      where: {
+        id: params.id,
+      },
+    });
+
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    console.error('Error deleting tour:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
 } 
