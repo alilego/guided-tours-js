@@ -41,7 +41,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-emerald-50">
+    <div className="flex flex-col min-h-[calc(100vh-4rem)]">
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
@@ -79,7 +79,7 @@ export default function AdminLayout({
         </div>
       </nav>
 
-      <main className="py-10">
+      <main className="flex-grow bg-emerald-50 py-10">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
           {children}
         </div>

@@ -18,14 +18,14 @@ export default function Navigation() {
     <nav className="bg-white shadow">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between">
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-4 lg:space-x-8">
             <div className="flex flex-shrink-0 items-center">
               <Link href="/" className="flex flex-col">
                 <span className="text-xl font-bold text-emerald-600">Steps & Stories</span>
                 <span className="text-xs text-gray-500">Local Guided Tours in Romania</span>
               </Link>
             </div>
-            <div className="hidden sm:flex sm:items-center sm:space-x-4">
+            <div className="hidden lg:flex lg:items-center lg:space-x-4">
               <Link
                 href="/"
                 className={`${pathname === '/' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
@@ -38,6 +38,14 @@ export default function Navigation() {
               >
                 Tours
               </Link>
+              {session && (session.user?.role === 'ADMIN' || session.user?.role === 'USER') && (
+                <Link
+                  href="/my-tours"
+                  className={`${pathname === '/my-tours' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
+                >
+                  My Tours
+                </Link>
+              )}
               {session && (
                 <Link
                   href="/bookings"
@@ -46,29 +54,17 @@ export default function Navigation() {
                   My Bookings
                 </Link>
               )}
-              <Link
-                href="/contact"
-                className={`${pathname === '/contact' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
-              >
-                Contact
-              </Link>
-              <Link
-                href="/about"
-                className={`${pathname === '/about' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
-              >
-                About Us
-              </Link>
+              {session?.user?.role === 'ADMIN' && (
+                <Link
+                  href="/admin/users"
+                  className={`${pathname.startsWith('/admin') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
+                >
+                  Admin Dashboard
+                </Link>
+              )}
             </div>
           </div>
-          <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
-            {session?.user?.role === 'ADMIN' && (
-              <Link
-                href="/admin/users"
-                className={`${pathname.startsWith('/admin') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium`}
-              >
-                Admin Dashboard
-              </Link>
-            )}
+          <div className="hidden lg:ml-6 lg:flex lg:items-center lg:space-x-4">
             {status === 'loading' ? (
               <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
             ) : session ? (
@@ -87,7 +83,7 @@ export default function Navigation() {
                 </span>
                 <button
                   onClick={() => signOut()}
-                  className="rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                  className="whitespace-nowrap rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
                 >
                   Sign out
                 </button>
@@ -108,7 +104,7 @@ export default function Navigation() {
               </Link>
             )}
           </div>
-          <div className="-mr-2 flex items-center sm:hidden">
+          <div className="flex items-center lg:hidden">
             <button
               type="button"
               className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
@@ -178,6 +174,15 @@ export default function Navigation() {
                     >
                       Tours
                     </Link>
+                    {session && (session.user?.role === 'ADMIN' || session.user?.role === 'USER') && (
+                      <Link
+                        href="/my-tours"
+                        className={`${pathname === '/my-tours' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} block rounded-md px-3 py-2 text-base font-medium`}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        My Tours
+                      </Link>
+                    )}
                     {session && (
                       <Link
                         href="/bookings"
@@ -187,20 +192,6 @@ export default function Navigation() {
                         My Bookings
                       </Link>
                     )}
-                    <Link
-                      href="/contact"
-                      className={`${pathname === '/contact' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} block rounded-md px-3 py-2 text-base font-medium`}
-                      onClick={() => setIsOpen(false)}
-                    >
-                      Contact
-                    </Link>
-                    <Link
-                      href="/about"
-                      className={`${pathname === '/about' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-700 hover:text-white'} block rounded-md px-3 py-2 text-base font-medium`}
-                      onClick={() => setIsOpen(false)}
-                    >
-                      About Us
-                    </Link>
                     {session?.user?.role === 'ADMIN' && (
                       <Link
                         href="/admin/users"
@@ -237,7 +228,7 @@ export default function Navigation() {
                             signOut();
                             setIsOpen(false);
                           }}
-                          className="block w-full rounded-md bg-gray-100 px-3 py-2 text-center text-base font-medium text-gray-700 hover:bg-gray-200"
+                          className="whitespace-nowrap rounded-md bg-gray-100 px-3 py-2 text-center text-base font-medium text-gray-700 hover:bg-gray-200"
                         >
                           Sign out
                         </button>
