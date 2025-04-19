@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { format } from 'date-fns';
+import ConfirmationModal from '@/components/ConfirmationModal';
 
 interface Booking {
   id: string;
@@ -25,6 +26,8 @@ export default function MyBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -45,17 +48,20 @@ export default function MyBookingsPage() {
     if (session?.user) {
       fetchBookings();
     } else {
-      setLoading(false); // Set loading to false if no user is logged in
+      setLoading(false);
     }
   }, [session]);
 
-  const handleCancelBooking = async (bookingId: string) => {
-    if (!confirm('Are you sure you want to cancel this booking?')) {
-      return;
-    }
+  const handleCancelClick = (bookingId: string) => {
+    setSelectedBookingId(bookingId);
+    setIsModalOpen(true);
+  };
+
+  const handleCancelBooking = async () => {
+    if (!selectedBookingId) return;
 
     try {
-      const response = await fetch(`/api/bookings/${bookingId}`, {
+      const response = await fetch(`/api/bookings/${selectedBookingId}`, {
         method: 'DELETE',
       });
 
@@ -64,9 +70,11 @@ export default function MyBookingsPage() {
       }
 
       // Remove the cancelled booking from the state
-      setBookings(bookings.filter(booking => booking.id !== bookingId));
+      setBookings(bookings.filter(booking => booking.id !== selectedBookingId));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to cancel booking');
+    } finally {
+      setSelectedBookingId(null);
     }
   };
 
@@ -114,67 +122,79 @@ export default function MyBookingsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-3xl font-bold text-gray-900">My Bookings</h1>
+    <>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="mb-8 text-3xl font-bold text-gray-900">My Bookings</h1>
 
-      {bookings.length === 0 ? (
-        <div className="rounded-lg bg-white p-6 text-center shadow">
-          <p className="text-gray-500">You haven't booked any tours yet.</p>
-          <Link
-            href="/tours"
-            className="mt-4 inline-flex items-center rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700"
-          >
-            Browse Tours
-          </Link>
-        </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {bookings.map((booking) => {
-            const currentParticipants = booking.tour.bookings.length;
+        {bookings.length === 0 ? (
+          <div className="rounded-lg bg-white p-6 text-center shadow">
+            <p className="text-gray-500">You haven't booked any tours yet.</p>
+            <Link
+              href="/tours"
+              className="mt-4 inline-flex items-center rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700"
+            >
+              Browse Tours
+            </Link>
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {bookings.map((booking) => {
+              const currentParticipants = booking.tour.bookings.length;
 
-            return (
-              <div key={booking.id} className="overflow-hidden rounded-lg bg-white shadow">
-                <div className="relative h-48">
-                  <Image
-                    src={booking.tour.imageUrl}
-                    alt={booking.tour.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="p-6 flex flex-col h-[calc(100%-12rem)]">
-                  <h3 className="text-xl font-semibold text-gray-900">{booking.tour.title}</h3>
-                  <div className="mt-auto">
-                    <div className="space-y-2">
-                      <p className="text-gray-600">
-                        Date: {format(new Date(booking.tour.date), 'MMMM d, yyyy')}
-                      </p>
-                      <p className="text-emerald-600">Price: €{booking.tour.price}</p>
-                      <p className="text-gray-600">
-                        Participants: {currentParticipants} out of {booking.tour.maxParticipants}
-                      </p>
-                    </div>
-                    <div className="mt-4 flex space-x-3">
-                      <Link
-                        href={`/tours/${booking.tour.id}`}
-                        className="flex-1 rounded-md bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-200 flex items-center justify-center"
-                      >
-                        View Details
-                      </Link>
-                      <button
-                        onClick={() => handleCancelBooking(booking.id)}
-                        className="flex-1 rounded-md bg-red-100 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-200 flex items-center justify-center"
-                      >
-                        Cancel Booking
-                      </button>
+              return (
+                <div key={booking.id} className="overflow-hidden rounded-lg bg-white shadow">
+                  <div className="relative h-48">
+                    <Image
+                      src={booking.tour.imageUrl}
+                      alt={booking.tour.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="p-6 flex flex-col h-[calc(100%-12rem)]">
+                    <h3 className="text-xl font-semibold text-gray-900">{booking.tour.title}</h3>
+                    <div className="mt-auto">
+                      <div className="space-y-2">
+                        <p className="text-gray-600">
+                          Date: {format(new Date(booking.tour.date), 'MMMM d, yyyy')}
+                        </p>
+                        <p className="text-emerald-600">Price: €{booking.tour.price}</p>
+                        <p className="text-gray-600">
+                          Participants: {currentParticipants} out of {booking.tour.maxParticipants}
+                        </p>
+                      </div>
+                      <div className="mt-4 flex space-x-3">
+                        <Link
+                          href={`/tours/${booking.tour.id}`}
+                          className="flex-1 rounded-md bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-200 flex items-center justify-center"
+                        >
+                          View Details
+                        </Link>
+                        <button
+                          onClick={() => handleCancelClick(booking.id)}
+                          className="flex-1 rounded-md bg-red-100 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-200 flex items-center justify-center"
+                        >
+                          Cancel Booking
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleCancelBooking}
+        title="Cancel Booking"
+        message="Are you sure you want to cancel this booking? This action cannot be undone."
+        confirmText="Yes, Cancel Booking"
+        cancelText="No, Keep Booking"
+      />
+    </>
   );
 } 

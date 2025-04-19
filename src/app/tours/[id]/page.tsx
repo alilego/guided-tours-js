@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { format } from 'date-fns';
 import { prisma } from '@/lib/prisma';
 import BookingButton from './components/BookingButton';
+import { formatDuration } from '@/utils/formatDuration';
 
 export default async function TourDetailPage({
   params,
@@ -70,7 +71,7 @@ export default async function TourDetailPage({
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-emerald-600 mr-2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
-                <span className="text-gray-700">Duration: {tour.duration} hours</span>
+                <span className="text-gray-700">Duration: {formatDuration(tour.duration)}</span>
               </div>
               
               <div className="flex items-center">

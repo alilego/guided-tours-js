@@ -19,10 +19,10 @@ export async function POST(request: Request) {
       role: session?.user?.role 
     });
 
-    if (!session || session.user.role !== 'ADMIN') {
+    if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'GUIDE')) {
       console.log('❌ Unauthorized upload attempt');
       return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
+        { error: 'Unauthorized - Admin or Guide access required' },
         { status: 403 }
       );
     }
