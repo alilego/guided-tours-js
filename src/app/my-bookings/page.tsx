@@ -142,30 +142,32 @@ export default function MyBookingsPage() {
                     className="object-cover"
                   />
                 </div>
-                <div className="p-6">
+                <div className="p-6 flex flex-col h-[calc(100%-12rem)]">
                   <h3 className="text-xl font-semibold text-gray-900">{booking.tour.title}</h3>
-                  <div className="mt-2 space-y-2">
-                    <p className="text-gray-600">
-                      Date: {format(new Date(booking.tour.date), 'MMMM d, yyyy')}
-                    </p>
-                    <p className="text-emerald-600">Price: €{booking.tour.price}</p>
-                    <p className="text-gray-600">
-                      Participants: {currentParticipants} out of {booking.tour.maxParticipants}
-                    </p>
-                  </div>
-                  <div className="mt-4 flex space-x-3">
-                    <Link
-                      href={`/tours/${booking.tour.id}`}
-                      className="flex-1 rounded-md bg-emerald-100 px-4 py-2 text-center text-sm font-medium text-emerald-700 hover:bg-emerald-200"
-                    >
-                      View Details
-                    </Link>
-                    <button
-                      onClick={() => handleCancelBooking(booking.id)}
-                      className="flex-1 rounded-md bg-red-100 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-200"
-                    >
-                      Cancel Booking
-                    </button>
+                  <div className="mt-auto">
+                    <div className="space-y-2">
+                      <p className="text-gray-600">
+                        Date: {format(new Date(booking.tour.date), 'MMMM d, yyyy')}
+                      </p>
+                      <p className="text-emerald-600">Price: €{booking.tour.price}</p>
+                      <p className="text-gray-600">
+                        Participants: {currentParticipants} out of {booking.tour.maxParticipants}
+                      </p>
+                    </div>
+                    <div className="mt-4 flex space-x-3">
+                      <Link
+                        href={`/tours/${booking.tour.id}`}
+                        className="flex-1 rounded-md bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-200 flex items-center justify-center"
+                      >
+                        View Details
+                      </Link>
+                      <button
+                        onClick={() => handleCancelBooking(booking.id)}
+                        className="flex-1 rounded-md bg-red-100 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-200 flex items-center justify-center"
+                      >
+                        Cancel Booking
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
