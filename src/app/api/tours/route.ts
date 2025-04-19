@@ -23,18 +23,55 @@ const createTourSchema = z.object({
   imageUrl: z.string().min(1, 'Image URL is required'),
 });
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const tours = await prisma.tour.findMany({
-      include: {
-        bookings: true,
-      },
-      orderBy: {
-        date: 'asc',
-      },
-    });
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '9');
+    const skip = (page - 1) * limit;
 
-    return NextResponse.json(tours);
+    const [tours, total] = await Promise.all([
+      prisma.tour.findMany({
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          imageUrl: true,
+          date: true,
+          duration: true,
+          maxParticipants: true,
+          price: true,
+          _count: {
+            select: {
+              bookings: true
+            }
+          }
+        },
+        orderBy: {
+          date: 'asc',
+        },
+        skip,
+        take: limit,
+      }),
+      prisma.tour.count()
+    ]);
+
+    // Transform the data to match the expected format
+    const formattedTours = tours.map(tour => ({
+      ...tour,
+      bookings: new Array(tour._count.bookings), // Create array of undefined with length equal to bookings count
+      _count: undefined // Remove the _count field
+    }));
+
+    return NextResponse.json({
+      tours: formattedTours,
+      pagination: {
+        total,
+        pages: Math.ceil(total / limit),
+        currentPage: page,
+        perPage: limit
+      }
+    });
   } catch (error) {
     console.error('Error fetching tours:', error);
     return new NextResponse('Internal Server Error', { status: 500 });

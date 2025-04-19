@@ -23,31 +23,46 @@ interface Tour {
   bookings: any[];
 }
 
+interface PaginationData {
+  total: number;
+  pages: number;
+  currentPage: number;
+  perPage: number;
+}
+
 export default function ToursListPage() {
   const [tours, setTours] = useState<Tour[]>([]);
+  const [pagination, setPagination] = useState<PaginationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchTours = async () => {
-      try {
-        const response = await fetch('/api/tours');
-        if (!response.ok) {
-          throw new Error('Failed to fetch tours');
-        }
-        const data = await response.json();
-        setTours(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
+  const fetchTours = async (page: number = 1) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/tours?page=${page}&limit=9`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch tours');
       }
-    };
+      const data = await response.json();
+      setTours(data.tours);
+      setPagination(data.pagination);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchTours();
   }, []);
 
-  if (loading) {
+  const handlePageChange = (page: number) => {
+    fetchTours(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  if (loading && tours.length === 0) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent"></div>
@@ -85,8 +100,8 @@ export default function ToursListPage() {
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-          {tours.map((tour) => {
-            const currentParticipants = tour.bookings?.length || 0;
+          {tours.map((tour, index) => {
+            const currentParticipants = tour.bookings.length;
             const isFullyBooked = currentParticipants >= tour.maxParticipants;
 
             return (
@@ -99,7 +114,10 @@ export default function ToursListPage() {
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover object-center group-hover:opacity-75"
-                      priority={false}
+                      priority={index < 3} // Only prioritize first 3 images
+                      loading={index < 3 ? 'eager' : 'lazy'}
+                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx4eHRoaHSQtJSEkMj4xLy0vLi4zOkpBPDpKNzIuRVFXV11tf2RfZGljY2Rra2z/2wBDARUXFx4aHR4eHGxjOiM6bGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGz/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+                      placeholder="blur"
                     />
                     {isFullyBooked && (
                       <div className="absolute top-2 left-2 bg-black/50 px-2 py-1 rounded text-sm font-medium text-white">
@@ -137,6 +155,35 @@ export default function ToursListPage() {
             );
           })}
         </div>
+
+        {/* Pagination */}
+        {pagination && pagination.pages > 1 && (
+          <div className="mt-8 flex justify-center">
+            <nav className="flex items-center space-x-2" aria-label="Pagination">
+              {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`px-4 py-2 text-sm font-medium rounded-md ${
+                    page === pagination.currentPage
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                  disabled={page === pagination.currentPage}
+                >
+                  {page}
+                </button>
+              ))}
+            </nav>
+          </div>
+        )}
+
+        {/* Loading indicator for pagination */}
+        {loading && tours.length > 0 && (
+          <div className="mt-8 flex justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent"></div>
+          </div>
+        )}
       </div>
     </div>
   );
