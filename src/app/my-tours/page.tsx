@@ -72,7 +72,7 @@ export default async function MyToursPage() {
         },
       },
       bookings: true,
-      Review: true,
+      reviews: true,
     } as Prisma.TourInclude,
   });
   console.log('✅ Found tours:', { count: tours.length });

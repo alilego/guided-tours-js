@@ -27,7 +27,7 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id           String   @id
   sessionToken String   @unique
   userId       String
   expires      DateTime
@@ -37,10 +37,10 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String    @id
   name          String?
   email         String?   @unique
-  emailVerified DateTime?
+  emailVerified DateTime? @map("emailVerified")
   image         String?
   role          String    @default("USER")
   password      String?
@@ -48,7 +48,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
   bookings      Booking[]
-  Review        Review[]
+  reviews       Review[]
   sessions      Session[]
   createdTours  Tour[]    @relation("CreatedTours")
 }
@@ -74,7 +74,7 @@ model Tour {
   maxParticipants Int
   creatorId       String
   bookings        Booking[]
-  Review          Review[]
+  reviews         Review[]
   creator         User      @relation("CreatedTours", fields: [creatorId], references: [id])
 
   @@index([creatorId])
@@ -94,15 +94,16 @@ model Booking {
 }
 
 model Review {
-  id        String   @id @default(cuid())
-  rating    Int
-  comment   String
-  userId    String
-  tourId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  tour      Tour     @relation(fields: [tourId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  id         String   @id @default(cuid())
+  rating     Int
+  comment    String
+  userId     String
+  tourId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  reviewerId String?  
+  tour       Tour     @relation(fields: [tourId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
 }
 
 enum UserRole {

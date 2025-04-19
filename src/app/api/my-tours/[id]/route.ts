@@ -36,7 +36,7 @@ export async function GET(
           },
         },
         bookings: true,
-        Review: true,
+        reviews: true,
       } as Prisma.TourInclude,
     });
 
@@ -111,7 +111,7 @@ export async function PATCH(
           },
         },
         bookings: true,
-        Review: true,
+        reviews: true,
       } as Prisma.TourInclude,
     });
 
