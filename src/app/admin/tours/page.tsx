@@ -7,8 +7,9 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { format } from 'date-fns';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
@@ -16,240 +17,215 @@ interface Tour {
   id: string;
   title: string;
   description: string;
-  imageUrl: string;
+  date: string;
   price: number;
   duration: number;
-  date: string;
   maxParticipants: number;
-  createdAt: string;
+  bookings: any[];
 }
 
-export default function ToursPage() {
-  const { data: session } = useSession();
+interface PaginationData {
+  total: number;
+  pages: number;
+  currentPage: number;
+  perPage: number;
+}
+
+export default function AdminToursPage() {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [tours, setTours] = useState<Tour[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [pagination, setPagination] = useState<PaginationData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [tourToDelete, setTourToDelete] = useState<Tour | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  const fetchTours = async () => {
+  const fetchTours = async (page: number = 1) => {
     try {
-      const response = await fetch('/api/tours', {
-        cache: 'no-store'
-      });
-      const data = await response.json();
-
+      setLoading(true);
+      const response = await fetch(`/api/tours?page=${page}&limit=10`);
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch tours');
+        throw new Error('Failed to fetch tours');
       }
-
-      setTours(data);
+      const data = await response.json();
+      setTours(data.tours);
+      setPagination(data.pagination);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTours();
-  }, []);
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin');
+    } else if (session?.user?.role !== 'ADMIN') {
+      router.push('/');
+    } else {
+      fetchTours();
+    }
+  }, [session, status, router]);
 
-  const handleDeleteClick = (tour: Tour) => {
-    setTourToDelete(tour);
-    setShowDeleteConfirm(true);
-  };
+  const handleDelete = async (tourId: string) => {
+    if (!confirm('Are you sure you want to delete this tour?')) {
+      return;
+    }
 
-  const handleDeleteConfirm = async () => {
-    if (!tourToDelete) return;
-    
-    setIsDeleting(true);
-    setError(null);
-    
     try {
-      const response = await fetch(`/api/tours/${tourToDelete.id}`, {
+      const response = await fetch(`/api/tours/${tourId}`, {
         method: 'DELETE',
-        cache: 'no-store'
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to delete tour');
+        throw new Error('Failed to delete tour');
       }
 
-      // Remove the deleted tour from the state
-      setTours(tours.filter(tour => tour.id !== tourToDelete.id));
-      setShowDeleteConfirm(false);
-      setTourToDelete(null);
-
-      // Revalidate and refresh all tour-related pages
-      router.refresh();
-      
-      // Force revalidation of the my-tours page
-      await fetch('/api/revalidate?path=/my-tours');
-      await fetch('/api/revalidate?path=/tours');
-      
+      // Refresh the tours list
+      fetchTours(pagination?.currentPage || 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete tour');
-    } finally {
-      setIsDeleting(false);
     }
   };
 
-  if (isLoading) {
+  const handlePageChange = (page: number) => {
+    fetchTours(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  if (status === 'loading' || (loading && tours.length === 0)) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-red-600">{error}</div>
+      <div className="rounded-md bg-red-50 p-4">
+        <div className="flex">
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-red-800">Error loading tours</h3>
+            <div className="mt-2 text-sm text-red-700">
+              <p>{error}</p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Tours Management</h1>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">Tours</h1>
+          <h1 className="text-base font-semibold leading-6 text-gray-900">Tours</h1>
           <p className="mt-2 text-sm text-gray-700">
-            A list of all tours in the system.
+            A list of all tours including their title, date, price, and status.
           </p>
+        </div>
+        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <Link
+            href="/admin/tours/new"
+            className="block rounded-md bg-emerald-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+          >
+            Add Tour
+          </Link>
+        </div>
+      </div>
+      <div className="mt-8 flow-root">
+        <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+          <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+            <table className="min-w-full divide-y divide-gray-300">
+              <thead>
+                <tr>
+                  <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                    Title
+                  </th>
+                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    Date
+                  </th>
+                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    Price
+                  </th>
+                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    Duration
+                  </th>
+                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    Participants
+                  </th>
+                  <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {tours.map((tour) => (
+                  <tr key={tour.id}>
+                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                      {tour.title}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      {format(new Date(tour.date), 'MMMM d, yyyy')}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      €{tour.price}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      {tour.duration} hours
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      {tour.bookings.length} / {tour.maxParticipants}
+                    </td>
+                    <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                      <Link
+                        href={`/admin/tours/${tour.id}/edit`}
+                        className="text-emerald-600 hover:text-emerald-900 mr-4"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(tour.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      {error && (
-        <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
-          {error}
+      {/* Pagination */}
+      {pagination && pagination.pages > 1 && (
+        <div className="mt-8 flex justify-center">
+          <nav className="flex items-center space-x-2" aria-label="Pagination">
+            {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-4 py-2 text-sm font-medium rounded-md ${
+                  page === pagination.currentPage
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+                disabled={page === pagination.currentPage}
+              >
+                {page}
+              </button>
+            ))}
+          </nav>
         </div>
       )}
 
-      <div className="mt-8 flex flex-col">
-        <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-              <table className="min-w-full divide-y divide-gray-300">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                    >
-                      Title
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      Date
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      Price
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      Duration
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      Max Participants
-                    </th>
-                    <th
-                      scope="col"
-                      className="relative py-3.5 pl-3 pr-4 sm:pr-6"
-                    >
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {tours.map((tour) => (
-                    <tr key={tour.id}>
-                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                        {tour.title}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {new Date(tour.date).toLocaleDateString()}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        £{tour.price.toFixed(2)}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {tour.duration} hours
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {tour.maxParticipants}
-                      </td>
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        <Link
-                          href={`/admin/tours/${tour.id}`}
-                          className="text-emerald-600 hover:text-emerald-900 mr-4"
-                        >
-                          Edit
-                        </Link>
-                        <button
-                          onClick={() => handleDeleteClick(tour)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Delete Confirmation Dialog */}
-      {showDeleteConfirm && tourToDelete && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Delete Tour
-            </h3>
-            <p className="text-sm text-gray-500 mb-6">
-              Are you sure you want to delete "{tourToDelete.title}"? This action cannot be undone.
-              All bookings and reviews associated with this tour will also be deleted.
-            </p>
-            <div className="flex justify-end space-x-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowDeleteConfirm(false);
-                  setTourToDelete(null);
-                }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
-                disabled={isDeleting}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDeleteConfirm}
-                disabled={isDeleting}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
-              >
-                {isDeleting ? 'Deleting...' : 'Yes, Delete Tour'}
-              </button>
-            </div>
-          </div>
+      {/* Loading indicator for pagination */}
+      {loading && tours.length > 0 && (
+        <div className="mt-8 flex justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent"></div>
         </div>
       )}
     </div>

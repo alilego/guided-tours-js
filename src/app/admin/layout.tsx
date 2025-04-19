@@ -73,7 +73,7 @@ export default function AdminLayout({
         </div>
       </nav>
 
-      <main className="flex-grow bg-emerald-50 py-10">
+      <main className="flex-grow bg-gray-50 py-10">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
           {children}
         </div>
