@@ -28,36 +28,42 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '9');
+    const hideFullyBooked = searchParams.get('hideFullyBooked') === 'true';
     const skip = (page - 1) * limit;
 
-    const [tours, total] = await Promise.all([
-      prisma.tour.findMany({
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          imageUrl: true,
-          date: true,
-          duration: true,
-          maxParticipants: true,
-          price: true,
-          _count: {
-            select: {
-              bookings: true
-            }
+    // First get all tours with their booking counts
+    const toursWithBookings = await prisma.tour.findMany({
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        imageUrl: true,
+        date: true,
+        duration: true,
+        maxParticipants: true,
+        price: true,
+        _count: {
+          select: {
+            bookings: true
           }
-        },
-        orderBy: {
-          date: 'asc',
-        },
-        skip,
-        take: limit,
-      }),
-      prisma.tour.count()
-    ]);
+        }
+      },
+      orderBy: {
+        date: 'asc',
+      },
+    });
+
+    // Filter out fully booked tours if needed
+    const filteredTours = hideFullyBooked
+      ? toursWithBookings.filter(tour => tour._count.bookings < tour.maxParticipants)
+      : toursWithBookings;
+
+    // Apply pagination
+    const total = filteredTours.length;
+    const paginatedTours = filteredTours.slice(skip, skip + limit);
 
     // Transform the data to match the expected format
-    const formattedTours = tours.map(tour => ({
+    const formattedTours = paginatedTours.map(tour => ({
       ...tour,
       bookings: new Array(tour._count.bookings), // Create array of undefined with length equal to bookings count
       _count: undefined // Remove the _count field

@@ -33,14 +33,16 @@ interface PaginationData {
 
 export default function ToursListPage() {
   const [tours, setTours] = useState<Tour[]>([]);
+  const [hideFullyBooked, setHideFullyBooked] = useState(false);
   const [pagination, setPagination] = useState<PaginationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchTours = async (page: number = 1) => {
+  const fetchTours = async (page: number = 1, filterFullyBooked: boolean = false) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/tours?page=${page}&limit=9`);
+      const response = await fetch(`/api/tours?page=${page}&limit=9${filterFullyBooked ? '&hideFullyBooked=true' : ''}`);
       if (!response.ok) {
         throw new Error('Failed to fetch tours');
       }
@@ -55,11 +57,17 @@ export default function ToursListPage() {
   };
 
   useEffect(() => {
-    fetchTours();
+    fetchTours(1, false);
   }, []);
 
+  const handleFilter = () => {
+    setCurrentPage(1); // Reset to first page when filtering
+    fetchTours(1, hideFullyBooked);
+  };
+
   const handlePageChange = (page: number) => {
-    fetchTours(page);
+    setCurrentPage(page);
+    fetchTours(page, hideFullyBooked);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -98,6 +106,30 @@ export default function ToursListPage() {
               Browse our selection of guided tours and find the perfect adventure for you.
             </p>
           </div>
+        </div>
+
+        {/* Filtering Row */}
+        <div className="mt-8 mb-6 flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center">
+              <input
+                id="hide-fully-booked"
+                type="checkbox"
+                checked={hideFullyBooked}
+                onChange={(e) => setHideFullyBooked(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600"
+              />
+              <label htmlFor="hide-fully-booked" className="ml-2 text-sm text-gray-700">
+                Hide fully booked tours
+              </label>
+            </div>
+          </div>
+          <button
+            onClick={handleFilter}
+            className="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+          >
+            Apply Filters
+          </button>
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
