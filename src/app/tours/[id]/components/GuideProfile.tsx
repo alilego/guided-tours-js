@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface GuideProfileProps {
   userId: string;
@@ -80,9 +81,12 @@ export default function GuideProfile({ userId }: GuideProfileProps) {
                   {profileData.stats.averageRating} / 5
                 </span>
                 <span className="text-yellow-500 mx-1">★</span>
-                <span>
+                <Link 
+                  href={`/guides/${userId}/reviews`}
+                  className="hover:text-emerald-600 transition-colors"
+                >
                   ({profileData.stats.totalReviews} review{profileData.stats.totalReviews !== 1 ? 's' : ''})
-                </span>
+                </Link>
               </span>
             ) : (
               <span>No reviews yet</span>
