@@ -113,7 +113,7 @@ export default async function MyToursPage() {
                 </div>
                 <div className="p-4">
                   <div className="flex justify-between">
-                    <h3 className="text-sm font-medium text-gray-900">
+                    <h3 className={`text-sm font-medium ${new Date(tour.date) < new Date() ? 'text-red-600' : 'text-gray-900'}`}>
                       {tour.title}
                     </h3>
                     <p className="text-sm font-medium text-emerald-600">€{tour.price}</p>
