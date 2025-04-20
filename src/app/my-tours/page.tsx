@@ -60,9 +60,11 @@ export default async function MyToursPage() {
     where: {
       creatorId: user.id
     } as Prisma.TourWhereInput,
-    orderBy: {
-      createdAt: 'desc',
-    },
+    orderBy: [
+      {
+        date: 'asc'
+      }
+    ],
     include: {
       creator: {
         select: {
@@ -75,7 +77,24 @@ export default async function MyToursPage() {
       reviews: true,
     } as Prisma.TourInclude,
   });
-  console.log('✅ Found tours:', { count: tours.length });
+
+  // Sort tours: upcoming first (sorted by nearest), then past (sorted by most recent)
+  const sortedTours = [...tours].sort((a, b) => {
+    const now = new Date();
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    const aIsPast = dateA < now;
+    const bIsPast = dateB < now;
+
+    if (aIsPast === bIsPast) {
+      // If both are past or both are upcoming, sort by date
+      return aIsPast ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
+    }
+    // Put upcoming tours first
+    return aIsPast ? 1 : -1;
+  });
+
+  console.log('✅ Found tours:', { count: sortedTours.length });
 
   return (
     <div className="bg-white">
@@ -98,7 +117,7 @@ export default async function MyToursPage() {
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-          {tours.map((tour) => (
+          {sortedTours.map((tour) => (
             <div key={tour.id} className="group relative flex flex-col h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
               <Link href={`/my-tours/${tour.id}`} className="flex-grow">
                 <div className="relative h-64 w-full overflow-hidden rounded-t-lg bg-gray-200">
@@ -118,7 +137,7 @@ export default async function MyToursPage() {
                     </h3>
                     <p className="text-sm font-medium text-emerald-600">€{tour.price}</p>
                   </div>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className={`mt-1 text-sm ${new Date(tour.date) < new Date() ? 'text-red-600' : 'text-gray-500'}`}>
                     {format(new Date(tour.date), 'MMMM d, yyyy')}
                   </p>
                   <div className="mt-2 flex items-center justify-between text-sm text-gray-500">
