@@ -94,6 +94,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Prevent tour guides from reviewing their own tours
+    if (userId === session.user.id) {
+      return NextResponse.json(
+        { error: "Tour guides cannot review their own tours" },
+        { status: 400 }
+      );
+    }
+
     // Create the review
     const review = await prisma.review.create({
       data: {
