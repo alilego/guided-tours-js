@@ -8,8 +8,11 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { format } from 'date-fns';
+import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
+import { authOptions } from '@/lib/auth';
 import BookingButton from './components/BookingButton';
+import AddReview from './components/AddReview';
 import { formatDuration } from '@/utils/formatDuration';
 
 export default async function TourDetailPage({
@@ -17,12 +20,18 @@ export default async function TourDetailPage({
 }: {
   params: { id: string };
 }) {
+  const session = await getServerSession(authOptions);
   const tour = await prisma.tour.findUnique({
     where: { id: params.id },
     include: {
-      bookings: true,
+      bookings: {
+        where: session?.user?.id ? {
+          userId: session.user.id
+        } : undefined
+      },
       creator: {
         select: {
+          id: true,
           name: true,
           email: true,
         },
@@ -36,6 +45,10 @@ export default async function TourDetailPage({
 
   const formattedDate = format(new Date(tour.date), 'MMMM d, yyyy');
   const currentParticipants = tour.bookings.length;
+  const tourDate = new Date(tour.date);
+  const isPastTour = tourDate < new Date();
+  const userHasBooked = tour.bookings.length > 0;
+  const canReview = isPastTour && userHasBooked;
 
   return (
     <div className="bg-white">
@@ -115,6 +128,11 @@ export default async function TourDetailPage({
             <BookingButton tourId={tour.id} />
           </div>
         </div>
+
+        {/* Review Section */}
+        {canReview && (
+          <AddReview tourId={tour.id} userId={tour.creator.id} />
+        )}
       </div>
     </div>
   );
