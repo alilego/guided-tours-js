@@ -29,6 +29,7 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '9');
     const hideFullyBooked = searchParams.get('hideFullyBooked') === 'true';
+    const minDate = searchParams.get('minDate');
     const skip = (page - 1) * limit;
 
     // First get all tours with their booking counts
@@ -48,6 +49,11 @@ export async function GET(request: Request) {
           }
         }
       },
+      where: minDate ? {
+        date: {
+          gte: new Date(minDate)
+        }
+      } : undefined,
       orderBy: {
         date: 'asc',
       },

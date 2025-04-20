@@ -42,7 +42,10 @@ export default function ToursListPage() {
   const fetchTours = async (page: number = 1, filterFullyBooked: boolean = false) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/tours?page=${page}&limit=9${filterFullyBooked ? '&hideFullyBooked=true' : ''}`);
+      const currentDate = new Date().toISOString();
+      const response = await fetch(
+        `/api/tours?page=${page}&limit=9${filterFullyBooked ? '&hideFullyBooked=true' : ''}&minDate=${currentDate}`
+      );
       if (!response.ok) {
         throw new Error('Failed to fetch tours');
       }
