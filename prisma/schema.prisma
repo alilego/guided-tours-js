@@ -76,21 +76,25 @@ model Tour {
   bookings        Booking[]
   reviews         Review[]
   creator         User      @relation("CreatedTours", fields: [creatorId], references: [id])
+  occurrences     TourOccurrence[]
 
   @@index([creatorId])
 }
 
 model Booking {
-  id        String   @id @default(cuid())
-  userId    String
-  tourId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  tour      Tour     @relation(fields: [tourId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  id              String          @id @default(cuid())
+  userId          String
+  tourId          String
+  tourOccurrenceId String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  tour            Tour           @relation(fields: [tourId], references: [id])
+  tourOccurrence  TourOccurrence? @relation(fields: [tourOccurrenceId], references: [id])
+  user            User           @relation(fields: [userId], references: [id])
 
   @@index([tourId])
   @@index([userId])
+  @@index([tourOccurrenceId])
 }
 
 model Review {
@@ -104,6 +108,24 @@ model Review {
   reviewerId String?  
   tour       Tour     @relation(fields: [tourId], references: [id])
   user       User     @relation(fields: [userId], references: [id])
+
+  @@index([tourId])
+  @@index([userId])
+  @@index([reviewerId])
+}
+
+model TourOccurrence {
+  id        String              @id @default(cuid())
+  tourId    String
+  date      DateTime
+  status    TourOccurrenceStatus @default(SCHEDULED)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  tour      Tour              @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  bookings  Booking[]
+
+  @@unique([tourId, date])
+  @@index([tourId])
 }
 
 enum UserRole {
@@ -134,4 +156,9 @@ enum TourCategory {
   SHOPPING
   NIGHTLIFE
   RELIGIOUS
+}
+
+enum TourOccurrenceStatus {
+  SCHEDULED
+  CANCELED
 }
