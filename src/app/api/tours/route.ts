@@ -3,6 +3,13 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { addDays, addWeeks, addMonths, isBefore, endOfMonth } from 'date-fns';
+
+const RECURRENCE = {
+  DAILY: 'DAILY',
+  WEEKLY: 'WEEKLY',
+  MONTHLY: 'MONTHLY',
+} as const;
 
 // Validation schema for tour creation
 const createTourSchema = z.object({
@@ -21,6 +28,7 @@ const createTourSchema = z.object({
     typeof val === 'string' ? parseInt(val) : val
   ),
   imageUrl: z.string().min(1, 'Image URL is required'),
+  recurrence: z.enum([RECURRENCE.DAILY, RECURRENCE.WEEKLY, RECURRENCE.MONTHLY]).optional(),
 });
 
 export async function GET(request: Request) {
@@ -132,6 +140,46 @@ export async function POST(request: Request) {
         creatorId: user.id,
       },
     });
+
+    // If recurrence is specified, create tour occurrences for the next 6 months
+    if (validatedData.recurrence) {
+      const occurrences: { date: Date }[] = [];
+      let currentDate = new Date(validatedData.date);
+      const sixMonthsFromNow = addMonths(currentDate, 6);
+
+      while (isBefore(currentDate, sixMonthsFromNow)) {
+        occurrences.push({ date: new Date(currentDate) });
+
+        switch (validatedData.recurrence) {
+          case RECURRENCE.DAILY:
+            currentDate = addDays(currentDate, 1);
+            break;
+          case RECURRENCE.WEEKLY:
+            currentDate = addWeeks(currentDate, 1);
+            break;
+          case RECURRENCE.MONTHLY:
+            currentDate = addMonths(currentDate, 1);
+            break;
+        }
+      }
+
+      // Create all tour occurrences in a single transaction
+      await prisma.tourOccurrence.createMany({
+        data: occurrences.map(occurrence => ({
+          tourId: tour.id,
+          date: occurrence.date,
+          status: 'SCHEDULED',
+        })),
+      });
+
+      // Fetch the created tour with its occurrences
+      const tourWithOccurrences = await prisma.tour.findUnique({
+        where: { id: tour.id },
+        include: { occurrences: true },
+      });
+
+      return NextResponse.json(tourWithOccurrences, { status: 201 });
+    }
 
     return NextResponse.json(tour, { status: 201 });
   } catch (error) {
